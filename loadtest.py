@@ -1,12 +1,3 @@
-"""
-loadtest.py - Performance experiments: N simultaneous clients each upload then download a file.
-
-  python loadtest.py <server-ip> --clients 4 --file test_files/sample.txt [--user student --password cnt3004]
-
-Run it from a CLIENT machine (not the server). Results land in each client's
-CSV (loadtest_stats.csv) and in the server's server_stats.csv; then run
-`python analysis.py server_stats.csv --plots` for the graphs.
-"""
 import argparse
 import os
 import threading
