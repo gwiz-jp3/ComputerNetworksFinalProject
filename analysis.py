@@ -1,15 +1,3 @@
-"""
-analysis.py - Network Analysis module.
-
-* StatsCollector is started by the server (and optionally by each client).
-  Every operation is stored in memory (list of dicts) AND appended to a CSV by a
-  background writer thread, so results survive for offline review/report graphs.
-* Run this file directly on a CSV to print a summary and (if matplotlib is
-  installed) produce graphs:   python analysis.py server_stats.csv --plots
-
-Units: MB/s = bytes / 1,048,576 / seconds.   resp_ms = time until the first
-reply byte for a command (system response time).
-"""
 import argparse
 import collections
 import csv
@@ -29,7 +17,7 @@ def calc_mbps(nbytes, seconds):
 
 
 class StatsCollector:
-    """Thread-safe collector: in-memory list of dict rows + CSV persistence."""
+    
 
     def __init__(self, csv_path="server_stats.csv"):
         self.csv_path = csv_path
@@ -79,7 +67,6 @@ class StatsCollector:
             return summarize(list(self.records))
 
 
-# ------------------------------------------------------------- offline analysis
 def load_csv(path):
     with open(path, newline="") as f:
         return list(csv.DictReader(f))
@@ -93,7 +80,6 @@ def _num(v):
 
 
 def summarize(rows):
-    """Group by (source, op): count, avg/min/max MB/s, avg transfer time, avg response time."""
     groups = collections.defaultdict(list)
     for r in rows:
         if r.get("status", "OK") == "OK":
@@ -135,7 +121,6 @@ def make_plots(rows, outdir="plots"):
     ok = [r for r in rows if r.get("status") == "OK"]
     xfer = [r for r in ok if r["op"] in ("UPLOAD", "DOWNLOAD") and _num(r["mbps"])]
 
-    # 1. average data rate per operation/source
     s = [x for x in summarize(ok) if x["op"] in ("UPLOAD", "DOWNLOAD")]
     if s:
         labels = [f"{x['source']}\n{x['op']}" for x in s]
@@ -145,7 +130,6 @@ def make_plots(rows, outdir="plots"):
         plt.title("Upload / Download data rate")
         plt.tight_layout(); plt.savefig(os.path.join(outdir, "data_rate.png")); plt.close()
 
-    # 2. response time per operation
     s = summarize(ok)
     if s:
         labels = [f"{x['source']}\n{x['op']}" for x in s]
@@ -155,7 +139,6 @@ def make_plots(rows, outdir="plots"):
         plt.title("System response time by operation")
         plt.tight_layout(); plt.savefig(os.path.join(outdir, "response_time.png")); plt.close()
 
-    # 3. file size vs transfer time
     if xfer:
         plt.figure(figsize=(7, 4))
         for op in ("UPLOAD", "DOWNLOAD"):
